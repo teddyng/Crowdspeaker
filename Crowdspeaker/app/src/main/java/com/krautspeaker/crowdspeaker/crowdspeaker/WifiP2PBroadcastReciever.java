@@ -50,47 +50,42 @@ public class WifiP2PBroadcastReciever extends BroadcastReceiver {
             // Call WifiP2pManager.requestPeers() to get a list of current peers
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
 
-            if(type == 1) {
-                // Respond to new connection or disconnections
-                if (peerManager != null) {
-                    peerManager.requestPeers(peerChannel, new WifiP2pManager.PeerListListener() {
-
-                        @Override
-                        public void onPeersAvailable(WifiP2pDeviceList peers) {
-                            Log.i("OnPeersAvailable", String.format("PeerListListener: %d peers available, updating device list", peers.getDeviceList().size()));
-                            for (final WifiP2pDevice singlePeer : peers.getDeviceList()) {
-                                Log.i("Peer discoverd", singlePeer.deviceName);
 
 
-                                WifiP2pConfig config = new WifiP2pConfig();
-                                config.deviceAddress = singlePeer.deviceAddress;
-                                config.wps.setup = WpsInfo.PBC;
+            // Respond to new connection or disconnections
+            if (peerManager != null) {
+                peerManager.requestPeers(peerChannel, new WifiP2pManager.PeerListListener() {
 
-                                peerManager.connect(peerChannel, config, new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onPeersAvailable(WifiP2pDeviceList peers) {
+                        Log.i("OnPeersAvailable", String.format("PeerListListener: %d peers available, updating device list", peers.getDeviceList().size()));
+                        for (final WifiP2pDevice singlePeer : peers.getDeviceList()) {
+                            Log.i("Peer discoverd", singlePeer.deviceName);
 
-                                    @Override
-                                    public void onSuccess() {
-                                        // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
-                                        Log.i("Peer Connection", "Connected to " + singlePeer.deviceName);
-                                    }
 
-                                    @Override
-                                    public void onFailure(int reason) {
-                                        Log.e("Peer Connection", "Connection failed: " + singlePeer.deviceName);
-                                    }
-                                });
-                            }
-                            FileServerAsyncTask myTask = new FileServerAsyncTask(true, mainActivity.getApplicationContext());
-                            myTask.execute();
+                            WifiP2pConfig config = new WifiP2pConfig();
+                            config.deviceAddress = singlePeer.deviceAddress;
+                            config.wps.setup = WpsInfo.PBC;
 
+                            peerManager.connect(peerChannel, config, new WifiP2pManager.ActionListener() {
+
+                                @Override
+                                public void onSuccess() {
+                                    // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
+                                    Log.i("Peer Connection", "Connected to " + singlePeer.deviceName);
+                                }
+
+                                @Override
+                                public void onFailure(int reason) {
+                                    Log.e("Peer Connection", "Connection failed: " + singlePeer.deviceName);
+                                }
+                            });
                         }
-                    });
-                }
-            }else if(type == 2){
-                FileServerAsyncTask myTask = new FileServerAsyncTask(false, mainActivity.getApplicationContext());
-                myTask.execute();
-            }
 
+
+                    }
+                });
+            }
 
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             // Respond to this device's wifi state changing
