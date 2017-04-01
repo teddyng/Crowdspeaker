@@ -4,6 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingLeft="64dp"
+    android:paddingRight="64dp"
+    android:background="@color/colorPrimary"
+    android:gravity="center"
     tools:context="com.krautspeaker.crowdspeaker.crowdspeaker.MainActivity"
     android:orientation="vertical">
 
@@ -15,6 +19,7 @@
 
     <Button
         android:id="@+id/server"
+        style="@style/Widget.AppCompat.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Server" />
@@ -23,6 +28,6 @@
         android:id="@+id/Stop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Stop" />
+        android:text="Stop"/>
 
 </android.widget.LinearLayout>
