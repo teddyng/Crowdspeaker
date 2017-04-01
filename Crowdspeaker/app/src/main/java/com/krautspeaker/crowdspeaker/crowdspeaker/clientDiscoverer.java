@@ -20,6 +20,7 @@ public class clientDiscoverer extends AsyncTask{
     WifiP2pManager myManager;
     Channel myChannel;
 
+
      public clientDiscoverer(WifiP2pManager manager, Channel channel, Executor executor){
          myManager = manager;
          myChannel = channel;

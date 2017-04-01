@@ -54,13 +54,20 @@ public class FileServerAsyncTask extends AsyncTask {
 
 
             while(run){
+
                 if(server) {
                     String msg = "Hello at " +  System.currentTimeMillis() ;
                     DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(),
                             group, 6789);
                     s.send(hi);
                     // get their responses!
-                    Log.i("Message sending", msg);
+                    Log.i("Message send", msg);
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }else{
 
                     Log.i("IF", "IF");
@@ -68,14 +75,16 @@ public class FileServerAsyncTask extends AsyncTask {
                     DatagramPacket recv = new DatagramPacket(buf, buf.length);
                     s.receive(recv);
 
-
-                    Log.i("Message recieved", "Recieved");
                     Log.i("Message recieved", buf.toString());
                 }
+
             }
             // OK, I'm done talking - leave the group...
             s.leaveGroup(group);
-
+            if(wifi != null){
+                WifiManager.MulticastLock lock = wifi.createMulticastLock("Log_Tag");
+                lock.release();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,7 +92,7 @@ public class FileServerAsyncTask extends AsyncTask {
         return "Cool";
     }
 
-    private void stop(){
+    public void stopFileServer(){
         run = false;
     }
 

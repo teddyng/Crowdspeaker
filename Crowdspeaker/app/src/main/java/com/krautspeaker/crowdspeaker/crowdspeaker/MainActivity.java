@@ -60,25 +60,20 @@ public class MainActivity extends AppCompatActivity {
         myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
 
-        //StandartReciever: Client
-        myReceiver = new WifiP2PBroadcastReciever(myManager, myChannel, thisActivity, 2);
-
-
-        myTask = new FileServerAsyncTask(false, activityContext, myExecutor);
 
         /**
          * Set the Buttons for selection
          */
         Button clientButton = (Button) findViewById(R.id.client);
         Button serverButton = (Button) findViewById(R.id.server);
+        Button stopButton = (Button) findViewById(R.id.Stop);
 
         clientButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(canRegister){
                     onPause();
-                }
+
 
                 myReceiver = new WifiP2PBroadcastReciever(myManager, myChannel, thisActivity, 2);
 
@@ -95,9 +90,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
 
-                if(canRegister){
                     onPause();
-                }
+
 
 
 
@@ -118,7 +112,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+
+                onPause();
+                canRegister = false;
+
+
+            }
+        });
 
     }
 
@@ -150,16 +154,14 @@ public class MainActivity extends AppCompatActivity {
         if(canRegister) {
             //Register the Broadcast reciever
 
-            if(myDiscoverer.getStatus().toString() == "RUNNING"){
-                myDiscoverer.cancel(true);
+            myDiscoverer.cancel(true);
                 Log.i("Pause", "Discovere PAUSED");
 
-            }
-            if(myTask.getStatus().toString() == "RUNNING"){
+                myTask.stopFileServer();
                 myTask.cancel(true);
                 Log.i("Pause", "myTask PAUSED");
 
-            }
+
             unregisterReceiver(myReceiver);
 
         }
