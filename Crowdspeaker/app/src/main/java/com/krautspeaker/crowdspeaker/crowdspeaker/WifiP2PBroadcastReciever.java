@@ -77,9 +77,9 @@ public class WifiP2PBroadcastReciever extends BroadcastReceiver {
                             }
                         });
                     }
-/*                    FileServerAsyncTask myTask = new FileServerAsyncTask();
+                    FileServerAsyncTask myTask = new FileServerAsyncTask();
                     myTask.execute();
-                    */
+
 
                     // DO WHATEVER YOU WANT HERE
                     // YOU CAN GET ACCESS TO ALL THE DEVICES YOU FOUND FROM peers OBJECT
