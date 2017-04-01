@@ -3,6 +3,8 @@ package com.krautspeaker.crowdspeaker.crowdspeaker;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +17,11 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     IntentFilter myIntentFilter;
     Integer type = -1;
     Boolean canRegister = false;
+    FileServerAsyncTask myTask;
+    clientDiscoverer myDiscoverer;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -32,6 +41,30 @@ public class MainActivity extends AppCompatActivity {
 
         final Context activityContext = this.getApplicationContext();
         final MainActivity thisActivity = this;
+
+
+        //have a bigger threadpool
+        final Executor myExecutor = Executors.newFixedThreadPool(4);
+
+        //Setup the Broadcast Reciever, to get System Status
+        //PreSetup
+        myManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        myChannel = myManager.initialize(activityContext, getMainLooper(), null);
+        myDiscoverer = new clientDiscoverer(myManager, myChannel, myExecutor);
+
+        myIntentFilter = new IntentFilter();
+        //Create new Reciever and add Intents
+        myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+
+        //StandartReciever: Client
+        myReceiver = new WifiP2PBroadcastReciever(myManager, myChannel, thisActivity, 2);
+
+
+        myTask = new FileServerAsyncTask(false, activityContext, myExecutor);
 
         /**
          * Set the Buttons for selection
@@ -43,30 +76,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                if(canRegister){
+                    onPause();
+                }
 
-                if(canRegister)onPause();
-
-
-                //Setup the Broadcast Reciever, to get System Status
-                //PreSetup
-                myManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-                myChannel = myManager.initialize(activityContext, getMainLooper(), null);
-                myIntentFilter = new IntentFilter();
-                //Create new Reciever and add Intents
                 myReceiver = new WifiP2PBroadcastReciever(myManager, myChannel, thisActivity, 2);
-                myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-                myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-                myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-                myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
                 canRegister = true;
+                myTask = new FileServerAsyncTask(false, activityContext, myExecutor);
 
                 onResume();
-
-
-
-
-
 
             }
         });
@@ -76,35 +95,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
 
-                if(canRegister)onPause();
+                if(canRegister){
+                    onPause();
+                }
 
-                //Setup the Broadcast Reciever, to get System Status
-                //PreSetup
-                myManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-                myChannel = myManager.initialize(activityContext, getMainLooper(), null);
-                myIntentFilter = new IntentFilter();
-                //Create new Reciever and add Intents
+
+
                 myReceiver = new WifiP2PBroadcastReciever(myManager, myChannel, thisActivity, 1);
-                myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-                myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-                myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-                myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+                myTask = new FileServerAsyncTask(true, activityContext, myExecutor);
 
                 canRegister = true;
-
-                    myManager.discoverPeers(myChannel, new WifiP2pManager.ActionListener() {
-                        @Override
-                        public void onSuccess() {
-                            Log.i("Start discovery", "Discovery started");
-
-                        }
-
-                        @Override
-                        public void onFailure(int reason) {
-                            Log.e("Start discovery", "Discovery error");
-
-                        }
-                    });
 
 
 
@@ -128,7 +128,17 @@ public class MainActivity extends AppCompatActivity {
 
             if(canRegister) {
                 //Register the Broadcast reciever
+                if(myTask.getStatus().toString() != "RUNNING"){
+                    Log.i("Resume", "Tasker RESUMED");
+                    myTask.execute();
+                }
+                if(myDiscoverer.getStatus().toString() != "RUNNING"){
+                    Log.i("Resume", "Discovere RESUMED");
+                    myDiscoverer.execute();
+                }
+
                 registerReceiver(myReceiver, myIntentFilter);
+
                 Log.i("Reciever Registerer", "Registered");
 
             }
@@ -139,8 +149,18 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         if(canRegister) {
             //Register the Broadcast reciever
+
+            if(myDiscoverer.getStatus().toString() == "RUNNING"){
+                myDiscoverer.cancel(true);
+                Log.i("Pause", "Discovere PAUSED");
+
+            }
+            if(myTask.getStatus().toString() == "RUNNING"){
+                myTask.cancel(true);
+                Log.i("Pause", "myTask PAUSED");
+
+            }
             unregisterReceiver(myReceiver);
-            Log.i("Reciever Registerer", "Unregistered");
 
         }
 

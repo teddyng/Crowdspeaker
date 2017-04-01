@@ -18,6 +18,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.sql.Time;
+import java.util.concurrent.Executor;
 
 
 public class FileServerAsyncTask extends AsyncTask {
@@ -26,10 +27,12 @@ public class FileServerAsyncTask extends AsyncTask {
     Boolean run;
     Context myContext;
 
-    public FileServerAsyncTask(Boolean server, Context context) {
+    public FileServerAsyncTask(Boolean server, Context context, Executor executor) {
         this.server = server;
         this.run = true;
         this.myContext = context;
+
+        executeOnExecutor(executor);
     }
 
 
@@ -51,10 +54,6 @@ public class FileServerAsyncTask extends AsyncTask {
 
 
             while(run){
-                Thread.sleep(1000);
-
-                Log.i("IF", "IF");
-
                 if(server) {
                     String msg = "Hello at " +  System.currentTimeMillis() ;
                     DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(),
@@ -63,6 +62,8 @@ public class FileServerAsyncTask extends AsyncTask {
                     // get their responses!
                     Log.i("Message sending", msg);
                 }else{
+
+                    Log.i("IF", "IF");
                     byte[] buf = new byte[1000];
                     DatagramPacket recv = new DatagramPacket(buf, buf.length);
                     s.receive(recv);
@@ -77,14 +78,12 @@ public class FileServerAsyncTask extends AsyncTask {
 
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
         return "Cool";
     }
 
-    public void stop(){
+    private void stop(){
         run = false;
     }
 
