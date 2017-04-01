@@ -24,10 +24,12 @@ public class FileServerAsyncTask extends AsyncTask {
 
     Boolean server;
     Boolean run;
+    Context myContext;
 
-    public FileServerAsyncTask(Boolean server) {
+    public FileServerAsyncTask(Boolean server, Context context) {
         this.server = server;
         this.run = true;
+        this.myContext = context;
     }
 
 
@@ -40,24 +42,34 @@ public class FileServerAsyncTask extends AsyncTask {
             MulticastSocket s = new MulticastSocket(6789);
             s.joinGroup(group);
 
-            while(run) {
+            WifiManager wifi = (WifiManager)myContext.getSystemService( Context.WIFI_SERVICE );
+            if(wifi != null){
+                WifiManager.MulticastLock lock = wifi.createMulticastLock("Log_Tag");
+                lock.acquire();
+            }
+
+
+
+            while(run){
                 Thread.sleep(1000);
 
-                if(server) {
+                Log.i("IF", "IF");
 
+                if(server) {
                     String msg = "Hello at " +  System.currentTimeMillis() ;
                     DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(),
                             group, 6789);
                     s.send(hi);
                     // get their responses!
-                    Log.i("Messege sending", msg);
+                    Log.i("Message sending", msg);
                 }else{
                     byte[] buf = new byte[1000];
-                DatagramPacket recv = new DatagramPacket(buf, buf.length);
-                s.receive(recv);
+                    DatagramPacket recv = new DatagramPacket(buf, buf.length);
+                    s.receive(recv);
 
 
-                Log.i("Message recieved", buf.toString());
+                    Log.i("Message recieved", "Recieved");
+                    Log.i("Message recieved", buf.toString());
                 }
             }
             // OK, I'm done talking - leave the group...

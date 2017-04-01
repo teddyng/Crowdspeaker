@@ -80,14 +80,14 @@ public class WifiP2PBroadcastReciever extends BroadcastReceiver {
                                     }
                                 });
                             }
-                            FileServerAsyncTask myTask = new FileServerAsyncTask(true);
+                            FileServerAsyncTask myTask = new FileServerAsyncTask(true, mainActivity.getApplicationContext());
                             myTask.execute();
 
                         }
                     });
                 }
             }else if(type == 2){
-                FileServerAsyncTask myTask = new FileServerAsyncTask(false);
+                FileServerAsyncTask myTask = new FileServerAsyncTask(false, mainActivity.getApplicationContext());
                 myTask.execute();
             }
 
