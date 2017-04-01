@@ -8,19 +8,21 @@
     android:orientation="vertical">
 
     <Button
-        android:layout_width="368dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/server"
-        android:text="Server"/>
-    <Button
-        android:layout_width="368dp"
-        android:layout_height="wrap_content"
         android:id="@+id/client"
-        android:text="Client"/>
-    <Button
-        android:layout_width="368dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="Client" />
+
+    <Button
+        android:id="@+id/server"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Server" />
+
+    <Button
         android:id="@+id/Stop"
-        android:text="Stop"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop" />
 
 </android.widget.LinearLayout>
