@@ -63,7 +63,6 @@ public class RecordActivity extends AppCompatActivity {
     private void startPlaying() {
         mPlayer = new MediaPlayer();
         try {
-            Log.e("ERROR", "What the fuck?");
             mPlayer.setDataSource(mFileName);
             mPlayer.prepare();
             mPlayer.start();
@@ -86,7 +85,6 @@ public class RecordActivity extends AppCompatActivity {
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
-            Log.e("ERROR", "What the fuck?");
 
             mRecorder.prepare();
         } catch (IOException e) {
