@@ -8,6 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.net.UnknownHostException;
+
 public class MainActivity extends AppCompatActivity {
 
     WifiP2pManager myManager;
@@ -35,20 +41,45 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-       myManager.discoverPeers(myChannel, new WifiP2pManager.ActionListener(){
+       /*myManager.discoverPeers(myChannel, new WifiP2pManager.ActionListener(){
             @Override
             public void onSuccess() {
-                Log.i("Discover Peers", "Peers discoverd");
+                Log.i("Start discovery", "Discovery started");
 
             }
 
             @Override
             public void onFailure(int reason) {
-                Log.i("Discover Peers", "NO peers discoverd");
+                Log.e("Start discovery", "Discovery error");
 
             }
-        });
+        });*/
 
+
+
+        try {
+        String msg = "Hello";
+        InetAddress group = null;
+            group = InetAddress.getByName("228.5.6.7");
+        MulticastSocket s = new MulticastSocket(6789);
+        s.joinGroup(group);
+        DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(),
+                group, 6789);
+        s.send(hi);
+
+            Log.i("Message send", msg);
+        // get their responses!
+        byte[] buf = new byte[1000];
+        DatagramPacket recv = new DatagramPacket(buf, buf.length);
+        s.receive(recv);
+            Log.i("Message recieve", buf.toString());
+        // OK, I'm done talking - leave the group...
+        s.leaveGroup(group);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
     }
