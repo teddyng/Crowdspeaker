@@ -21,14 +21,15 @@ public class WifiP2PBroadcastReciever extends BroadcastReceiver {
     private Channel peerChannel;
     private MainActivity mainActivity;
     private WifiP2pDeviceList myDevices;
+    private Integer type;
 
-    public WifiP2PBroadcastReciever(WifiP2pManager manager, Channel channel, MainActivity activity) {
+    public WifiP2PBroadcastReciever(WifiP2pManager manager, Channel channel, MainActivity activity, Integer type) {
         super();
 
         this.peerManager = manager;
         this.peerChannel = channel;
         this.mainActivity = activity;
-
+        this.type = type;
         this.myDevices = new WifiP2pDeviceList();
     }
 
@@ -44,50 +45,51 @@ public class WifiP2PBroadcastReciever extends BroadcastReceiver {
             }else{
                 //Inform user and close app
 
-                Log.i("P2P State Test", "P2P available");            }
+                Log.e("P2P State Test", "P2P not available");            }
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             // Call WifiP2pManager.requestPeers() to get a list of current peers
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
-            // Respond to new connection or disconnections
-            if (peerManager != null) {
-                peerManager.requestPeers(peerChannel, new WifiP2pManager.PeerListListener() {
 
-                @Override
-                public void onPeersAvailable(WifiP2pDeviceList peers) {
-                    Log.i("OnPeersAvailable",String.format("PeerListListener: %d peers available, updating device list", peers.getDeviceList().size()));
-                    for(final WifiP2pDevice singlePeer : peers.getDeviceList()) {
-                        Log.i("Peer discoverd", singlePeer.deviceName);
+            if(type == 1) {
+                // Respond to new connection or disconnections
+                if (peerManager != null) {
+                    peerManager.requestPeers(peerChannel, new WifiP2pManager.PeerListListener() {
+
+                        @Override
+                        public void onPeersAvailable(WifiP2pDeviceList peers) {
+                            Log.i("OnPeersAvailable", String.format("PeerListListener: %d peers available, updating device list", peers.getDeviceList().size()));
+                            for (final WifiP2pDevice singlePeer : peers.getDeviceList()) {
+                                Log.i("Peer discoverd", singlePeer.deviceName);
 
 
-                        WifiP2pConfig config = new WifiP2pConfig();
-                        config.deviceAddress = singlePeer.deviceAddress;
-                        config.wps.setup = WpsInfo.PBC;
+                                WifiP2pConfig config = new WifiP2pConfig();
+                                config.deviceAddress = singlePeer.deviceAddress;
+                                config.wps.setup = WpsInfo.PBC;
 
-                        peerManager.connect(peerChannel, config, new WifiP2pManager.ActionListener() {
+                                peerManager.connect(peerChannel, config, new WifiP2pManager.ActionListener() {
 
-                            @Override
-                            public void onSuccess() {
-                                // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
-                                Log.i("Peer Connection", "Connected to " + singlePeer.deviceName);
+                                    @Override
+                                    public void onSuccess() {
+                                        // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
+                                        Log.i("Peer Connection", "Connected to " + singlePeer.deviceName);
+                                    }
+
+                                    @Override
+                                    public void onFailure(int reason) {
+                                        Log.e("Peer Connection", "Connection failed: " + singlePeer.deviceName);
+                                    }
+                                });
                             }
+                            FileServerAsyncTask myTask = new FileServerAsyncTask(true);
+                            myTask.execute();
 
-                            @Override
-                            public void onFailure(int reason) {
-                                Log.e("Peer Connection", "Connection failed: " + singlePeer.deviceName);
-                            }
-                        });
-                    }
-                    FileServerAsyncTask myTask = new FileServerAsyncTask();
-                    myTask.execute();
-
-
-                    // DO WHATEVER YOU WANT HERE
-                    // YOU CAN GET ACCESS TO ALL THE DEVICES YOU FOUND FROM peers OBJECT
-
+                        }
+                    });
                 }
-            });
+            }else if(type == 2){
+                FileServerAsyncTask myTask = new FileServerAsyncTask(false);
+                myTask.execute();
             }
-
 
 
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
