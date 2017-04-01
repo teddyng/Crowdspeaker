@@ -52,7 +52,7 @@ public class FileServerAsyncTask extends AsyncTask {
 
             while(run){
                 Thread.sleep(1000);
-                server = false;
+
                 Log.i("IF", "IF");
 
                 if(server) {
