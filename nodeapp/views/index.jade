@@ -1,0 +1,12 @@
+extends layout
+
+block content
+    h1= title
+    p Welcome to #{title}
+    input(type='text' id='song_url')
+    button(type='button' id='new_song') Set song
+    button(type='button' id='play_all') Play on all clients
+
+    #divVideo
+        video#video(controls='', width='560')
+            source#mp4(type='video/mp4')
