@@ -1,5 +1,6 @@
 package com.krautspeaker.crowdspeaker.crowdspeaker;
 
+import android.media.AudioRecord;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -19,7 +20,6 @@ public class clientDiscoverer extends AsyncTask{
 
     WifiP2pManager myManager;
     Channel myChannel;
-
 
      public clientDiscoverer(WifiP2pManager manager, Channel channel, Executor executor){
          myManager = manager;
