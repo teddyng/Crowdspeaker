@@ -17,3 +17,5 @@ The devices connect over the WifiP2P interfaces and connect into their own netwo
 We had a lot fun playing around with Android, because for most of us, it was our first Android project. It's kind of a cool to realise that you work on a topic only few people worked on before...that feeling helps us through the hard hours of documentation reading.
 
 # <3 Happy Hacking
+
+MLH Prime 2017
