@@ -5,7 +5,7 @@ That was the idea....
 
 But sadly the Android WifiP2P world is damn complicated and we did not manage to archive our goals.
 
-## What workvvs
+## What works
 The devices connect over the WifiP2P interfaces and connect into their own network. Sometimes they are able to transmit messages and also the audio stream is ready to go.
 
 ## Challenges that we suffered
