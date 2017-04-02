@@ -59,29 +59,41 @@ public class WifiP2PBroadcastReciever extends BroadcastReceiver {
                     @Override
                     public void onPeersAvailable(WifiP2pDeviceList peers) {
                         Log.i("OnPeersAvailable", String.format("PeerListListener: %d peers available, updating device list", peers.getDeviceList().size()));
-                        for (final WifiP2pDevice singlePeer : peers.getDeviceList()) {
-                            Log.i("Peer discoverd", singlePeer.deviceName);
 
 
-                            WifiP2pConfig config = new WifiP2pConfig();
-                            config.deviceAddress = singlePeer.deviceAddress;
-                            config.wps.setup = WpsInfo.PBC;
 
-                            peerManager.connect(peerChannel, config, new WifiP2pManager.ActionListener() {
+                                for (final WifiP2pDevice singlePeer : peers.getDeviceList()) {
+                                    Log.i("Peer discoverd", singlePeer.deviceName);
 
-                                @Override
-                                public void onSuccess() {
-                                    // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
-                                    Log.i("Peer Connection", "Connected to " + singlePeer.deviceName);
-                                }
 
-                                @Override
-                                public void onFailure(int reason) {
-                                    Log.e("Peer Connection", "Connection failed: " + singlePeer.deviceName);
-                                }
-                            });
+                                        Log.i("SinglePeer Status", String.valueOf(singlePeer.status));
+                                            WifiP2pConfig config = new WifiP2pConfig();
+                                            config.deviceAddress = singlePeer.deviceAddress;
+                                            config.wps.setup = WpsInfo.PBC;
+
+                                            if(type==1){
+                                                config.groupOwnerIntent = 15;
+                                            }
+
+                                                peerManager.connect(peerChannel, config, new WifiP2pManager.ActionListener() {
+
+                                                    @Override
+                                                    public void onSuccess() {
+                                                        // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
+                                                        Log.i("Peer Connection", "Connected to " + singlePeer.deviceName);
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(int reason) {
+                                                        Log.e("Peer Connection", "Connection failed: " + singlePeer.deviceName);
+                                                    }
+                                                });
+
+
+
+
+
                         }
-
 
                     }
                 });

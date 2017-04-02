@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //have a bigger threadpool
-        final Executor myExecutor = Executors.newFixedThreadPool(4);
+        final Executor myExecutor = Executors.newFixedThreadPool(6);
 
         //Setup the Broadcast Reciever, to get System Status
         //PreSetup
@@ -59,6 +60,14 @@ public class MainActivity extends AppCompatActivity {
         myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         myIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
+
+
+        //Set the multicast lock, for recieving multicasts
+        WifiManager wifi = (WifiManager)activityContext.getSystemService( Context.WIFI_SERVICE );
+        if(wifi != null){
+            WifiManager.MulticastLock lock = wifi.createMulticastLock("Log_Tag");
+            lock.acquire();
+        }
 
 
         /**
@@ -153,11 +162,11 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         if(canRegister) {
             //Register the Broadcast reciever
+            myTask.stopFileServer();
 
             myDiscoverer.cancel(true);
                 Log.i("Pause", "Discovere PAUSED");
 
-                myTask.stopFileServer();
                 myTask.cancel(true);
                 Log.i("Pause", "myTask PAUSED");
 
