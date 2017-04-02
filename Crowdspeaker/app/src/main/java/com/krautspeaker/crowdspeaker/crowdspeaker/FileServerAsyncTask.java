@@ -40,9 +40,10 @@ public class FileServerAsyncTask extends AsyncTask {
     protected String doInBackground(Object[] params) {
         try{
 
+
             //Register the Multicast Socket
-            InetAddress group = InetAddress.getByName("228.5.6.7");
-            MulticastSocket s = new MulticastSocket(6789);
+            InetAddress group = InetAddress.getByName("FF08:0:0:0:0:0:0:2");
+            MulticastSocket s = new MulticastSocket(9876);
             s.joinGroup(group);
 
             WifiManager wifi = (WifiManager)myContext.getSystemService( Context.WIFI_SERVICE );
@@ -58,7 +59,7 @@ public class FileServerAsyncTask extends AsyncTask {
                 if(server) {
                     String msg = "Hello at " +  System.currentTimeMillis() ;
                     DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(),
-                            group, 6789);
+                            group, 9876);
                     s.send(hi);
                     // get their responses!
                     Log.i("Message send", msg);
@@ -75,7 +76,7 @@ public class FileServerAsyncTask extends AsyncTask {
                     DatagramPacket recv = new DatagramPacket(buf, buf.length);
                     s.receive(recv);
 
-                    Log.i("Message recieved", buf.toString());
+                    Log.i("Message recieved", new String(buf, 0, recv.getLength()));
                 }
 
             }
